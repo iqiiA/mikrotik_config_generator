@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Configuration Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            width: 150px; /* Adjust size as needed */
+            height: auto;
+        }
+        .icons {
+            display: flex;
+            gap: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .details p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .details span {
+            font-weight: bold;
+        }
+        .output {
+            white-space: pre-wrap;
+            background-color: #eaeaea;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px 0;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="logofix.png" alt="Logo"> <!-- Replace with your logo path -->
+        </div>
+        <div class="icons">
+            <a href="https://www.instagram.com/fiqi_arya_yudhistira/" class="fa fa-instagram"></a>
+        </div>
+    </div>
+<br><br>
+    <div class="container">
+        <h1>CONFIGURATION SUMMARY</h1><br>
+        <center><img src="log1.png" alt="Logo" height="225px;" width="225px"></center><br>
+        <div class="details">
+            <p><span>WAN Interface:</span> <span id="wan-interface"></span></p>
+            <p><span>WAN Type:</span> <span id="wan-type"></span></p>
+            <p id="wan-ip-detail" style="display: none;"><span>WAN IP Address:</span> <span id="wan-ip"></span></p>
+            <p id="wan-subnet-detail" style="display: none;"><span>WAN Subnet Mask:</span> <span id="wan-subnet"></span></p>
+            <p id="wan-gateway-detail" style="display: none;"><span>WAN Gateway:</span> <span id="wan-gateway"></span></p>
+            <p id="dhcp-peer-dns-detail" style="display: none;"><span>Use Peer DNS:</span> <span id="dhcp-peer-dns"></span></p>
+            <p id="dhcp-add-route-detail" style="display: none;"><span>Add Default Route:</span> <span id="dhcp-add-route"></span></p>
+            <p><span>LAN Interface:</span> <span id="lan-interface"></span></p>
+            <p><span>LAN IP Address:</span> <span id="lan-ip"></span></p>
+            <p><span>LAN Subnet Mask:</span> <span id="lan-subnet"></span></p>
+            <p><span>Enable DHCP on LAN:</span> <span id="lan-dhcp"></span></p>
+        </div>
+
+        <div class="output">
+            <h3>Generated MikroTik Configuration</h3>
+            <pre id="config-output"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Get the configuration details from the query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const wanInterface = urlParams.get('wan-interface');
+        const wanType = urlParams.get('wan-type');
+        const wanIp = urlParams.get('wan-ip');
+        const wanSubnet = urlParams.get('wan-subnet');
+        const wanGateway = urlParams.get('wan-gateway');
+        const lanInterface = urlParams.get('lan-interface');
+        const lanIp = urlParams.get('lan-ip');
+        const lanSubnet = urlParams.get('lan-subnet');
+        const lanDhcp = urlParams.get('lan-dhcp'); // Ambil dari URL
+        const config = urlParams.get('config');
+    
+        // Cek nilai checkbox dan jika tidak ada, default ke OFF
+        const isDhcpPeerDnsChecked = urlParams.get('dhcp-peer-dns') === 'on';
+        const isDhcpAddRouteChecked = urlParams.get('dhcp-add-default-route') === 'on';
+    
+        // Display the details
+        document.getElementById("wan-interface").textContent = wanInterface;
+        document.getElementById("wan-type").textContent = wanType.charAt(0).toUpperCase() + wanType.slice(1);
+        document.getElementById("lan-interface").textContent = lanInterface;
+        document.getElementById("lan-ip").textContent = lanIp;
+        document.getElementById("lan-subnet").textContent = lanSubnet;
+        document.getElementById("lan-dhcp").textContent = lanDhcp; // Menampilkan 'Yes' atau 'No'
+    
+        // Show WAN IP fields if static is chosen
+        if (wanType === "static") {
+            document.getElementById("wan-ip-detail").style.display = "block";
+            document.getElementById("wan-subnet-detail").style.display = "block";
+            document.getElementById("wan-gateway-detail").style.display = "block";
+            document.getElementById("wan-ip").textContent = wanIp || "N/A"; // Default to "N/A" if empty
+            document.getElementById("wan-subnet").textContent = wanSubnet || "N/A"; // Default to "N/A"
+            document.getElementById("wan-gateway").textContent = wanGateway || "N/A"; // Default to "N/A"
+        } else {
+            // Show DHCP details
+            document.getElementById("dhcp-peer-dns-detail").style.display = "block";
+            document.getElementById("dhcp-add-route-detail").style.display = "block";
+            document.getElementById("dhcp-peer-dns").textContent = isDhcpPeerDnsChecked ? 'ON' : 'OFF';
+            document.getElementById("dhcp-add-route").textContent = isDhcpAddRouteChecked ? 'ON' : 'OFF';
+        }
+    
+        // Display the generated configuration
+        if (config) {
+            document.getElementById("config-output").textContent = decodeURIComponent(config);
+        } else {
+            document.getElementById("config-output").textContent = "No configuration data received.";
+        }
+    </script>
+
+    <footer>
+        <p style="text-align: center;">2024 Mikrotik Config Generator. All rights reserved.</p>
+        <p style="text-align: center;">@fiqi_arya_yudhistira</p>
+    </footer>
+</body>
+</html>

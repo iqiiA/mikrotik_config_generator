@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>MikroTik Config Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .welcome {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            align: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            width: 150px; /* Adjust size as needed */
+            height: auto;
+        }
+        .icons {
+            display: flex;
+            gap: 15px;
+        }
+        .icons svg {
+            width: 24px;
+            height: 24px;
+            fill: #333; /* Icon color */
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px 0;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="logofix.png" alt="Logo"> <!-- Replace with your logo path -->
+        </div>
+        <div class="icons">
+            <a href="https://www.instagram.com/fiqi_arya_yudhistira/" class="fa fa-instagram"></a>
+        </div>
+    </div>
+    <br><br>
+    <div class="Welcome">
+        <h2 style="text-align: center;">Welcome to Mikrotik Config Generator</h2>
+    </div>
+
+    <br><br>
+    <form id="config-form" method="GET" action="summary.html">
+        <center><img src="log1.png" alt="Logo" height="333px;" width="333px"></center>
+        <!-- WAN Configuration -->
+        <label for="wan-interface">WAN Interface:</label>
+        <select name="wan-interface" id="wan-interface" required>
+            <option value="" disabled selected>Select WAN Interface</option>
+            <option value="ether1">ether1</option>
+            <option value="ether2">ether2</option>
+            <option value="ether3">ether3</option>
+            <option value="ether4">ether4</option>
+            <option value="ether5">ether5</option>
+        </select><br><br>
+
+        <label for="wan-type">WAN Type:</label>
+        <select id="wan-type" name="wan-type">
+            <option value="static" selected>Static IP</option>
+            <option value="dhcp">DHCP Client</option>
+        </select><br><br>
+
+        <div id="static-wan-settings">
+            <label for="wan-ip">WAN IP Address:</label>
+            <input type="text" id="wan-ip" name="wan-ip" required><br><br>
+
+            <label for="wan-subnet">WAN Subnet Mask:</label>
+            <input type="text" id="wan-subnet" name="wan-subnet" placeholder="e.g., /24" required><br><br>
+
+            <label for="wan-gateway">WAN Gateway:</label>
+            <input type="text" id="wan-gateway" name="wan-gateway" required><br><br>
+        </div>
+
+        <div id="dhcp-wan-settings" style="display:none;">
+            <label for="dhcp-peer-dns">Use Peer DNS:</label>
+            <input type="checkbox" id="dhcp-peer-dns" name="dhcp-peer-dns"><br><br>
+
+            <label for="dhcp-add-default-route">Add Default Route:</label>
+            <input type="checkbox" id="dhcp-add-default-route" name="dhcp-add-default-route"><br><br>
+        </div>
+
+        <!-- LAN Configuration -->
+        <label for="lan-interface">LAN Interface:</label>
+        <select name="lan-interface" id="lan-interface" required>
+            <option value="" disabled selected>Select LAN Interface</option>
+            <option value="ether1">ether1</option>
+            <option value="ether2">ether2</option>
+            <option value="ether3">ether3</option>
+            <option value="ether4">ether4</option>
+            <option value="ether5">ether5</option>
+        </select><br><br>
+
+        <label for="lan-ip">LAN IP Address:</label>
+        <input type="text" id="lan-ip" name="lan-ip"><br><br>
+
+        <label for="lan-subnet">LAN Subnet Mask:</label>
+        <input type="text" id="lan-subnet" name="lan-subnet" placeholder="e.g., /24" required><br><br>
+
+        <label for="lan-dhcp">Enable DHCP on LAN:</label>
+        <input type="checkbox" id="lan-dhcp" name="lan-dhcp" value="on"><br><br>
+
+        <button type="button" onclick="generateAndSubmitConfig()">Generate Configuration</button>
+    </form>
+
+    <script>
+        const wanTypeSelect = document.getElementById('wan-type');
+        const staticWanSettings = document.getElementById('static-wan-settings');
+        const dhcpWanSettings = document.getElementById('dhcp-wan-settings');
+        const wanIpInput = document.getElementById('wan-ip');
+        const wanSubnetInput = document.getElementById('wan-subnet');
+        const wanGatewayInput = document.getElementById('wan-gateway');
+
+        // Initialize to show static settings at the start
+        staticWanSettings.style.display = 'block';
+        dhcpWanSettings.style.display = 'none';
+
+        // Show/hide fields based on WAN type selection
+        wanTypeSelect.addEventListener('change', function() {
+            if (this.value === 'static') {
+                staticWanSettings.style.display = 'block';
+                dhcpWanSettings.style.display = 'none';
+                wanIpInput.disabled = false;
+                wanSubnetInput.disabled = false;
+                wanGatewayInput.disabled = false;
+            } else {
+                staticWanSettings.style.display = 'none';
+                dhcpWanSettings.style.display = 'block';
+                wanIpInput.disabled = true;
+                wanSubnetInput.disabled = true;
+                wanGatewayInput.disabled = true;
+            }
+        });
+
+        // Update LAN options based on WAN selection
+        const wanInterfaceSelect = document.getElementById('wan-interface');
+        const lanInterfaceSelect = document.getElementById('lan-interface');
+
+        wanInterfaceSelect.addEventListener('change', function() {
+            const selectedWan = this.value;
+            const lanOptions = lanInterfaceSelect.querySelectorAll('option');
+            
+            lanOptions.forEach(option => {
+                if (option.value === selectedWan) {
+                    option.style.display = 'none';
+                } else {
+                    option.style.display = 'block';
+                }
+            });
+
+            if (lanInterfaceSelect.value === selectedWan) {
+                lanInterfaceSelect.value = "";
+            }
+        });
+        
+        function generateAndSubmitConfig() {
+            const wanInterface = document.getElementById("wan-interface").value;
+            const wanType = document.getElementById("wan-type").value;
+            const wanIp = document.getElementById("wan-ip").value;
+            const wanSubnet = document.getElementById("wan-subnet").value;
+            const wanGateway = document.getElementById("wan-gateway").value;
+            const lanInterface = document.getElementById("lan-interface").value;
+            const lanIp = document.getElementById("lan-ip").value;
+            const lanSubnet = document.getElementById("lan-subnet").value;
+
+            let config = "";
+
+            // Handle DHCP checkboxes
+            const lanDhcp = document.getElementById("lan-dhcp").checked ? 'Yes' : 'No';
+            const dhcpPeerDns = document.getElementById("dhcp-peer-dns").checked ? 'on' : 'off';
+            const dhcpAddDefaultRoute = document.getElementById("dhcp-add-default-route").checked ? 'on' : 'off';
+
+
+            // WAN Configuration
+            if (wanType === "static") {
+                const wanIp = document.getElementById("wan-ip").value;
+                const wanSubnet = document.getElementById("wan-subnet").value;
+                const wanGateway = document.getElementById("wan-gateway").value;
+                config += `/ip address add address=${wanIp}/${wanSubnet} interface=${wanInterface}\n`;
+                config += `/ip route add gateway=${wanGateway}\n`;
+            } else if (wanType === "dhcp") {
+                const dhcpPeerDns = document.getElementById("dhcp-peer-dns").checked;
+                const dhcpAddRoute = document.getElementById("dhcp-add-default-route").checked;
+                config += `/ip dhcp-client add interface=${wanInterface} use-peer-dns=${dhcpPeerDns} add-default-route=${dhcpAddRoute}\n`;
+            }
+
+            // LAN Configuration
+            config += `/ip address add address=${lanIp}/${lanSubnet} interface=${lanInterface}\n`;
+            if (document.getElementById("lan-dhcp").checked) { // Memastikan konfigurasi DHCP ditambahkan
+                config += `/ip dhcp-server setup interface=${lanInterface}\n`;
+            }
+
+            // Add NAT masquerade rule by default
+            config += `/ip firewall nat add chain=srcnat action=masquerade out-interface=${wanInterface}\n`;
+
+            // Encode the config for the query string
+            const encodedConfig = encodeURIComponent(config.trim());
+
+            // Redirect with the generated configuration
+            window.location.href = `summary.html?config=${encodedConfig}&wan-interface=${wanInterface}&wan-type=${wanType}&wan-ip=${wanIp}&wan-subnet=${wanSubnet}&wan-gateway=${wanGateway}&lan-interface=${lanInterface}&lan-ip=${lanIp}&lan-subnet=${lanSubnet}&lan-dhcp=${lanDhcp}&dhcp-peer-dns=${dhcpPeerDns}&dhcp-add-default-route=${dhcpAddDefaultRoute}`;
+}
+    </script>
+</body>
+<br>
+<footer>
+    <p style="text-align: center;">2024 Mikrotik Config Generator. All rights reserved.</p>
+    <p style="text-align: center;">@fiqi_arya_yudhistira</p>
+</footer>
+
+</html>
